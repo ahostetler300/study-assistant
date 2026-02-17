@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../../database/study-guide.db"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  focus        String?
+  createdAt    DateTime      @default(now())
+  quizzes      Quiz[]
+  results      Result[]
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  files     File[]
+  studySets StudySet[]
+}
+
+model SystemSetting {
+  key   String @id
+  value String
+}
+
+model File {
+  id            String         @id @default(cuid())
+  name          String
+  displayName   String?
+  geminiFileUri String?
+  mimeType      String
+  size          Int
+  category      Category?      @relation(fields: [categoryId], references: [id])
+  categoryId    String?
+  studySets     StudySet[]
+  
+  // Caching Metadata
+  cacheName         String?
+  cacheExpiresAt    DateTime?
+  contextTokenCount Int?
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model StudySet {
+  id           String     @id @default(cuid())
+  title        String
+  instructions String?    // The user's focus instructions
+  category     Category?  @relation(fields: [categoryId], references: [id])
+  categoryId   String?
+  files        File[]     // Multi-source grounding
+  questions    Question[]
+  quizzes      Quiz[]
+  createdAt    DateTime   @default(now())
+}
+
+model Question {
+  id            String      @id @default(cuid())
+  text          String
+  options       String      // JSON string
+  correctAnswer Int
+  explanation   String?
+  studySet      StudySet    @relation(fields: [studySetId], references: [id], onDelete: Cascade)
+  studySetId    String
+  quizzes       Quiz[]
+}
+
+model Quiz {
+  id           String      @id @default(cuid())
+  title        String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  studySets    StudySet[]
+  questions    Question[]
+  results      Result[]
+  createdAt    DateTime    @default(now())
+}
+
+model Result {
+  id             String      @id @default(cuid())
+  score          Int         // Questions correct
+  completedCount Int         // Questions attempted
+  totalCount     Int         // Total questions in the pool
+  skippedCount   Int
+  completedAt    DateTime    @default(now())
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  quiz           Quiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId         String
+}

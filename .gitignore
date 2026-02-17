@@ -1,0 +1,46 @@
+# Node.js
+node_modules/
+dist/
+.next/
+*.log
+npm-debug.log*
+
+# Next.js
+.env*.local
+.env.development
+.env.test
+.env.production
+.secrets.env
+
+# Database
+database/*.db
+database/*.db-journal
+database/*.db-shm
+database/*.db-wal
+
+# Backups
+backups/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# OS/System
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+
+# Data folders
+data/uploads/*
+!data/uploads/.gitkeep
+data/processed_content/*
+!data/processed_content/.gitkeep
+data/output/*
+!data/output/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
