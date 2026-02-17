@@ -23,6 +23,11 @@ git fetch origin main
 git reset --hard origin/main
 
 # 4. Web Application Lifecycle
+echo "📦 Checking Python dependencies..."
+if ! python3 -c "import markitdown" &> /dev/null; then
+    python3 -m pip install markitdown --break-system-packages || python3 -m pip install markitdown
+fi
+
 cd web || exit
 
 echo "📦 Checking for dependency updates..."

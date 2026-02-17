@@ -36,12 +36,20 @@ echo "✅ Node.js $(node -v) found."
 # Check for Python 3 (needed for the processing skill)
 if ! command -v python3 &> /dev/null; then
     echo "❌ Python 3 not found. It is required for document processing."
-    echo "Run: sudo apt-get update && sudo apt-get install -y python3"
+    echo "Run: sudo apt-get update && sudo apt-get install -y python3 python3-pip"
     exit 1
 fi
 echo "✅ Python $(python3 --version) found."
 
-# 2. Environment Setup (SETTINGS_SECRET)
+# 2. Python Dependency Check/Installation
+echo "📦 Checking Python dependencies..."
+if ! python3 -c "import markitdown" &> /dev/null; then
+    echo "Installing markitdown..."
+    python3 -m pip install markitdown --break-system-packages || python3 -m pip install markitdown
+fi
+echo "✅ Python dependencies ready."
+
+# 3. Environment Setup (SETTINGS_SECRET)
 echo ""
 echo "🔐 Configuring Security..."
 mkdir -p database data/uploads data/processed_content data/raw
