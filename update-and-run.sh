@@ -23,15 +23,26 @@ git fetch origin main
 git reset --hard origin/main
 
 # 4. Web Application Lifecycle
-echo "📦 Checking Python dependencies..."
-if ! python3 -c "import markitdown" &> /dev/null; then
-    python3 -m pip install markitdown --break-system-packages || python3 -m pip install markitdown
+echo "📦 Checking system and python dependencies..."
+
+# Tesseract Check
+if ! command -v tesseract &> /dev/null; then
+    sudo apt-get update && sudo apt-get install -y tesseract-ocr
 fi
+
+# Python Packages
+for pkg in markitdown ebooklib beautifulsoup4 markdownify; do
+    if ! python3 -c "import $pkg" &> /dev/null 2>&1; then
+        echo "Installing $pkg..."
+        python3 -m pip install $pkg --break-system-packages || python3 -m pip install $pkg
+    fi
+done
 
 cd web || exit
 
 echo "📦 Checking for dependency updates..."
 npm install
+npm install sharp
 
 echo "🗄️ Synchronizing database schema..."
 # This ensures new AI features (like caching) are added to your existing DB

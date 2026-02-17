@@ -41,12 +41,27 @@ if ! command -v python3 &> /dev/null; then
 fi
 echo "✅ Python $(python3 --version) found."
 
+# Check for Tesseract (OCR for images)
+if ! command -v tesseract &> /dev/null; then
+    echo "🔍 Installing Tesseract OCR for image processing..."
+    sudo apt-get update && sudo apt-get install -y tesseract-ocr
+fi
+echo "✅ Tesseract OCR found."
+
 # 2. Python Dependency Check/Installation
 echo "📦 Checking Python dependencies..."
+# Core conversion engine
 if ! python3 -c "import markitdown" &> /dev/null; then
     echo "Installing markitdown..."
     python3 -m pip install markitdown --break-system-packages || python3 -m pip install markitdown
 fi
+# EPUB and hierarchical parsing dependencies
+for pkg in ebooklib beautifulsoup4 markdownify; do
+    if ! python3 -c "import $pkg" &> /dev/null 2>&1; then
+        echo "Installing $pkg..."
+        python3 -m pip install $pkg --break-system-packages || python3 -m pip install $pkg
+    fi
+done
 echo "✅ Python dependencies ready."
 
 # 3. Environment Setup (SETTINGS_SECRET)
@@ -85,7 +100,7 @@ fi
 echo ""
 if confirm "📦 Install web application dependencies?"; then
     echo "Running npm install in ./web..."
-    cd web && npm install && cd ..
+    cd web && npm install && npm install sharp && cd ..
     echo "✅ Dependencies installed."
 fi
 
