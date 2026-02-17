@@ -46,7 +46,8 @@ npm install sharp
 
 echo "🗄️ Synchronizing database schema..."
 # This ensures new AI features (like caching) are added to your existing DB
-npx prisma migrate deploy
+# Using db push for maximum resilience on Raspberry Pi hardware
+npx prisma db push
 npx prisma generate
 
 echo "🏗️ Rebuilding the application..."
