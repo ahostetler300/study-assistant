@@ -23,7 +23,7 @@ async function findAvailablePort(startPort) {
 }
 
 async function start() {
-    const port = await findAvailablePort(3002);
+    const port = await findAvailablePort(3003);
     console.log(`Starting Study Assistant on port ${port}...`);
     
     const next = spawn('npx', ['next', 'start', '-p', port], {
