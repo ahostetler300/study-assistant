@@ -50,11 +50,10 @@ echo "✅ Tesseract OCR found."
 
 # 2. Python Dependency Check/Installation
 echo "📦 Checking Python dependencies..."
-# Core conversion engine
-if ! python3 -c "import markitdown" &> /dev/null; then
-    echo "Installing markitdown..."
-    python3 -m pip install markitdown --break-system-packages || python3 -m pip install markitdown
-fi
+# Core conversion engine with ALL features (PDF, Office, etc.)
+echo "Ensuring markitdown[all] is installed..."
+python3 -m pip install "markitdown[all]" --break-system-packages || python3 -m pip install "markitdown[all]"
+
 # EPUB and hierarchical parsing dependencies
 for pkg in ebooklib beautifulsoup4 markdownify; do
     if ! python3 -c "import $pkg" &> /dev/null 2>&1; then

@@ -30,8 +30,11 @@ if ! command -v tesseract &> /dev/null; then
     sudo apt-get update && sudo apt-get install -y tesseract-ocr
 fi
 
-# Python Packages
-for pkg in markitdown ebooklib beautifulsoup4 markdownify; do
+# Python Packages - Ensure markitdown[all] is present
+echo "Ensuring markitdown[all] is installed..."
+python3 -m pip install "markitdown[all]" --break-system-packages || python3 -m pip install "markitdown[all]"
+
+for pkg in ebooklib beautifulsoup4 markdownify; do
     if ! python3 -c "import $pkg" &> /dev/null 2>&1; then
         echo "Installing $pkg..."
         python3 -m pip install $pkg --break-system-packages || python3 -m pip install $pkg

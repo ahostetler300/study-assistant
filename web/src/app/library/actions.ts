@@ -29,7 +29,7 @@ export async function uploadFile(formData: FormData) {
 
   try {
     const skillScript = join(process.cwd(), "..", "skills", "study-guide-processor", "scripts", "universal_processor.py");
-    await execPromise(`python3 "${skillScript}" "${inputPath}" "${processedDir}"`);
+    await execPromise(`ONNXRUNTIME_LOGGER_SEVERITY=3 python3 "${skillScript}" "${inputPath}" "${processedDir}"`);
 
     const mdFileName = `${file.name.replace(/\.[^/.]+$/, "")}.md`;
     const mdPath = join(processedDir, mdFileName);
@@ -63,7 +63,7 @@ export async function uploadFromUrl(url: string, displayName?: string, categoryI
     await mkdir(processedDir, { recursive: true });
 
     const skillScript = join(process.cwd(), "..", "skills", "study-guide-processor", "scripts", "universal_processor.py");
-    const { stdout } = await execPromise(`python3 "${skillScript}" "${url}" "${processedDir}"`);
+    const { stdout } = await execPromise(`ONNXRUNTIME_LOGGER_SEVERITY=3 python3 "${skillScript}" "${url}" "${processedDir}"`);
     
     const match = stdout.match(/✓ Saved to: (.*\.md)/);
     if (!match) throw new Error("Could not determine processed filename");
