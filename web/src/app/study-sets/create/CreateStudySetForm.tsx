@@ -28,8 +28,8 @@ export default function CreateStudySetForm() {
 
   useEffect(() => {
     Promise.all([
-        fetch("/api/files").then(res => res.json()),
-        fetch("/api/categories").then(res => res.json())
+        fetch("/api/files", { cache: "no-store" }).then(res => res.json()),
+        fetch("/api/categories", { cache: "no-store" }).then(res => res.json())
     ]).then(([f, c]) => {
         setFiles(f);
         setCategories(c);

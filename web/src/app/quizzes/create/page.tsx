@@ -26,8 +26,8 @@ export default function CreateQuizPage() {
 
   useEffect(() => {
     Promise.all([
-        fetch("/api/study-sets").then(res => res.json()),
-        fetch("/api/categories").then(res => res.json())
+        fetch("/api/study-sets", { cache: "no-store" }).then(res => res.json()),
+        fetch("/api/categories", { cache: "no-store" }).then(res => res.json())
     ]).then(([s, c]) => {
         setSets(s);
         setCategories(c);
