@@ -1,8 +1,7 @@
 "use client";
 
-import { Home, BookOpen, Library, Settings, PlusCircle } from "lucide-react";
+import { Home, BookOpen, Library, Settings, Layers } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { useUser } from "./UserContext";
 
@@ -23,13 +22,10 @@ export default function MobileNav() {
           <span className="text-[10px] mt-1 font-bold uppercase tracking-tighter">Library</span>
         </Link>
         
-        <div className="relative -top-7">
-           <Link href="/study-sets">
-            <Button size="icon" className="h-14 w-14 rounded-full shadow-2xl border-4 border-background bg-primary text-primary-foreground hover:scale-105 transition-transform">
-              <PlusCircle size={32} strokeWidth={2.5} />
-            </Button>
-           </Link>
-        </div>
+        <Link href="/study-sets" className={`flex flex-col items-center p-2 transition-colors ${pathname.startsWith('/study-sets') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <Layers size={22} />
+          <span className="text-[10px] mt-1 font-bold uppercase tracking-tighter">Sets</span>
+        </Link>
 
         <Link href={user ? `/quizzes?userId=${user.id}` : "/quizzes"} className={`flex flex-col items-center p-2 transition-colors ${pathname === '/quizzes' ? 'text-primary' : 'text-muted-foreground'}`}>
           <BookOpen size={22} />
