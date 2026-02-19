@@ -51,7 +51,7 @@ function GeminiLogo({ size = 16 }: { size?: number }) {
 
 function formatMarkdown(text: string) {
     // Robust markdown-lite formatter
-    let html = text
+    const html = text
         .replace(/^### (.*$)/gim, '<h3 class="font-black text-primary mt-6 mb-2 border-b border-primary/10 pb-1">$1</h3>')
         .replace(/^## (.*$)/gim, '<h2 class="font-black text-primary mt-8 mb-4 border-b-2 border-primary/20 pb-2">$1</h2>')
         .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-primary">$1</strong>')
