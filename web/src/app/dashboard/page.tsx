@@ -22,6 +22,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
   const fileCount = await prisma.file.count();
   const setCount = await prisma.studySet.count();
+  const quizCount = await prisma.quiz.count({ where: { userId: searchParams.userId } });
   
   const recentResults = await prisma.result.findMany({
     where: { userId: searchParams.userId },
@@ -31,22 +32,22 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
   });
 
   return (
-    <div className="flex flex-col gap-8 p-4 max-w-4xl mx-auto pb-24 pt-6 text-slate-900 dark:text-slate-100 font-sans">
+    <div className="flex flex-col gap-6 sm:gap-8 p-4 max-w-4xl mx-auto pb-24 pt-6 text-slate-900 dark:text-slate-100 font-sans">
       <header className="space-y-1">
-        <h1 className="text-4xl font-black tracking-tight">Mastery Dashboard</h1>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Mastery Dashboard</h1>
         <p className="text-muted-foreground font-medium">A place for learning</p>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link href="/library" className="block group">
           <Card className="bg-primary/5 border-primary/10 hover:border-primary/30 transition-all rounded-3xl overflow-hidden shadow-sm h-full">
-            <CardContent className="p-8 flex flex-col items-center justify-center gap-4 text-center">
+            <CardContent className="p-5 sm:p-8 flex flex-col items-center justify-center gap-4 text-center">
               <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                 <FileText size={32} />
               </div>
               <div className="space-y-1">
                 <p className="text-3xl font-black">{fileCount}</p>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Sources</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Sources</p>
               </div>
             </CardContent>
           </Card>
@@ -54,13 +55,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
         <Link href="/study-sets" className="block group">
           <Card className="bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/30 transition-all rounded-3xl overflow-hidden shadow-sm h-full">
-            <CardContent className="p-8 flex flex-col items-center justify-center gap-4 text-center">
+            <CardContent className="p-5 sm:p-8 flex flex-col items-center justify-center gap-4 text-center">
               <div className="bg-indigo-500/10 w-16 h-16 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                 <Layers size={32} />
               </div>
               <div className="space-y-1">
                 <p className="text-3xl font-black">{setCount}</p>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Study Sets</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Study Sets</p>
               </div>
             </CardContent>
           </Card>
@@ -68,12 +69,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
         <Link href={`/quizzes?userId=${searchParams.userId}`} className="block group">
           <Card className="bg-emerald-500/5 border-emerald-500/10 hover:border-emerald-500/30 transition-all rounded-3xl overflow-hidden shadow-sm h-full">
-            <CardContent className="p-8 flex flex-col items-center justify-center gap-4 text-center text-slate-900 dark:text-slate-100 no-underline">
+            <CardContent className="p-5 sm:p-8 flex flex-col items-center justify-center gap-4 text-center text-slate-900 dark:text-slate-100 no-underline">
               <div className="bg-emerald-500/10 w-16 h-16 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                 <ClipboardCheck size={32} />
               </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">My Personal Quizzes</p>
+              <div className="space-y-1">
+                <p className="text-3xl font-black">{quizCount}</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Quizzes</p>
               </div>
             </CardContent>
           </Card>
@@ -88,14 +90,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
           <Button asChild size="lg" className="h-20 justify-start gap-5 text-xl font-black shadow-xl rounded-3xl group bg-indigo-600 hover:bg-indigo-700 text-white border-none">
             <Link href="/study-sets/create">
               <div className="bg-white/20 p-2 rounded-xl group-hover:scale-110 transition-transform">
-                <PlusCircle size={28} />
+                <Layers size={28} />
               </div>
               Generate Study Set
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="h-20 justify-start gap-5 text-xl font-black shadow-lg rounded-3xl group border-2 border-emerald-500/20 hover:bg-emerald-500/5 text-emerald-700 dark:text-emerald-400">
+          <Button asChild size="lg" className="h-20 justify-start gap-5 text-xl font-black shadow-xl rounded-3xl group bg-emerald-900 hover:bg-emerald-800 text-emerald-50 border-none">
             <Link href={`/quizzes/create?userId=${searchParams.userId}`}>
-              <div className="bg-emerald-500/10 p-2 rounded-xl group-hover:scale-110 transition-transform">
+              <div className="bg-emerald-500/20 p-2 rounded-xl group-hover:scale-110 transition-transform">
                 <ClipboardCheck size={28} />
               </div>
               Build Quiz

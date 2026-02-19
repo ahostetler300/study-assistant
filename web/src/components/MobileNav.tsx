@@ -13,7 +13,7 @@ export default function MobileNav() {
   if (pathname === "/") return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-md p-2 md:hidden z-50 px-6 h-16 flex justify-around items-center shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-xl p-2 md:hidden z-50 px-4 h-16 flex justify-around items-center shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)]">
         <Link href={user ? `/dashboard?userId=${user.id}` : "/dashboard"} className={`flex flex-col items-center p-2 transition-colors ${pathname === '/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}>
           <Home size={22} />
           <span className="text-[10px] mt-1 font-bold uppercase tracking-tighter">Home</span>

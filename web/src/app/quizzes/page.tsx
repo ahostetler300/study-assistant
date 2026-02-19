@@ -36,10 +36,10 @@ export default async function MyQuizzesPage({ searchParams }: { searchParams: { 
   });
 
   return (
-    <div className="flex flex-col gap-6 pb-24 p-4 max-w-4xl mx-auto pt-6 text-slate-900 dark:text-slate-100 font-sans">
+    <div className="flex flex-col gap-5 sm:gap-6 pb-24 p-4 max-w-4xl mx-auto pt-6 text-slate-900 dark:text-slate-100 font-sans">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-2">
         <div>
-            <h1 className="text-3xl font-black tracking-tight">My Quizzes</h1>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">My Quizzes</h1>
             <p className="text-muted-foreground text-sm font-medium">Testing sessions tailored to your focus.</p>
         </div>
         <Link href="/quizzes/create">

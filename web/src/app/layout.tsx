@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
@@ -18,6 +18,17 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Study Assistant",
   description: "AI-powered study assistant for your family.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Study Assistant",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#4f46e5",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

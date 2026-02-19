@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardCheck, Calendar, Trophy, ChevronLeft, Clock } from "lucide-react";
+import { ClipboardCheck, Calendar, Trophy, ChevronLeft, Clock, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
 
@@ -25,9 +25,17 @@ export default async function QuizAttemptsPage({ params }: { params: { id: strin
                 <ChevronLeft size={16} /> Back to My Quizzes
             </Button>
         </Link>
-        <div>
-            <h1 className="text-3xl font-black tracking-tight">{quiz.title}</h1>
-            <p className="text-muted-foreground text-sm font-medium">History of all mastery attempts for this quiz.</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+              <h1 className="text-3xl font-black tracking-tight">{quiz.title}</h1>
+              <p className="text-muted-foreground text-sm font-medium">History of all mastery attempts for this quiz.</p>
+          </div>
+          <Link href={`/quizzes/${quiz.id}`}>
+              <Button className="rounded-2xl font-black h-12 px-8 shadow-lg gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none">
+                  <RotateCcw size={20} />
+                  Retake Quiz
+              </Button>
+          </Link>
         </div>
       </header>
 

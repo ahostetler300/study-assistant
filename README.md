@@ -9,6 +9,8 @@ An AI-powered, family-oriented study mastery platform designed for the Raspberry
 - **⚡ Context Caching**: Optimized for large documents (like 700+ page technical manuals) with 99% token efficiency.
 - **Secure Vault**: AES-256-GCM encryption for API keys and sensitive data.
 - **Universal Ingestion**: Supports PDF, EPUB, DOCX, XLSX, Images (OCR), and Web Scraping.
+- **AI-Powered Tutoring**: Grounded, pedagogical deep-dives for every quiz question.
+- **PWA Support**: Installable on mobile with standalone mode and branded splash screens.
 - **Modern UI**: Apple-style aesthetic with glassmorphic elements and high-contrast accessibility.
 
 ## 🛠️ Installation on Raspberry Pi
