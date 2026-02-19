@@ -72,15 +72,15 @@ export default function ProfileClient({ initialUsers }: { initialUsers: User[] }
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] p-6">
         <div className="w-full max-w-2xl space-y-8 text-slate-900 dark:text-slate-100 font-sans text-center">
-            <header className="space-y-4">
-                <div className="inline-flex bg-primary/10 p-4 rounded-3xl text-primary mb-2 sm:mb-0">
-                    <BookOpen size={40} className="sm:size-8" />
+            <header className="space-y-2">
+                <div className="inline-flex bg-primary/10 p-3 rounded-2xl text-primary mb-2">
+                    <BookOpen size={32} />
                 </div>
-                <h1 className="text-4xl sm:text-5xl font-black tracking-tight">Study Assistant</h1>
-                <p className="text-xl sm:text-lg text-muted-foreground font-medium">Select your profile to continue your journey.</p>
+                <h1 className="text-4xl font-black tracking-tight">Study Assistant</h1>
+                <p className="text-muted-foreground text-lg font-medium">Select your profile to continue your journey.</p>
             </header>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                 {users.map((user) => (
                 <Link 
                     key={user.id} 
@@ -98,17 +98,17 @@ export default function ProfileClient({ initialUsers }: { initialUsers: User[] }
                     className="block no-underline outline-none"
                 >
                     <Card 
-                        className={`relative transition-all duration-300 group rounded-[2.5rem] shadow-sm border-slate-200/60 dark:border-slate-800/60 bg-card ${
+                        className={`relative transition-all duration-300 group rounded-3xl shadow-sm border-slate-200/60 dark:border-slate-800/60 bg-card ${
                             isRemoveMode ? 'ring-2 ring-destructive/20 border-destructive/50 opacity-90' : 'hover:border-primary hover:bg-primary/5 hover:scale-[1.02]'
                         } ${!mounted && 'cursor-default pointer-events-auto'}`}
                     >
-                        <CardContent className="p-8 sm:p-6 flex items-center gap-6 text-slate-600 dark:text-slate-400">
-                        <div className={`bg-slate-200 dark:bg-slate-800 p-4 sm:p-3 rounded-2xl transition-colors ${!isRemoveMode && mounted && 'group-hover:bg-primary group-hover:text-primary-foreground'}`}>
-                            <UserIcon size={32} className="sm:size-6" />
+                        <CardContent className="p-6 flex items-center gap-4 text-slate-600 dark:text-slate-400">
+                        <div className={`bg-slate-200 dark:bg-slate-800 p-3 rounded-2xl transition-colors ${!isRemoveMode && mounted && 'group-hover:bg-primary group-hover:text-primary-foreground'}`}>
+                            <UserIcon size={24} />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-black text-2xl sm:text-lg text-slate-900 dark:text-slate-100 truncate">{user.name}</h3>
-                            <p className="text-sm sm:text-xs text-muted-foreground uppercase font-black tracking-widest truncate">{user.focus || "General Mastery"}</p>
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 truncate">{user.name}</h3>
+                            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider truncate">{user.focus || "General Mastery"}</p>
                         </div>
 
                         {isRemoveMode && (
@@ -116,7 +116,7 @@ export default function ProfileClient({ initialUsers }: { initialUsers: User[] }
                                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleDeleteUser(user.id, user.name); }}
                                 className="ml-2 text-destructive hover:scale-110 transition-transform"
                             >
-                                <Trash2 size={28} className="sm:size-6" />
+                                <Trash2 size={24} />
                             </button>
                         )}
                         </CardContent>
@@ -128,10 +128,10 @@ export default function ProfileClient({ initialUsers }: { initialUsers: User[] }
                     <Button 
                         variant="outline" 
                         onClick={() => { setIsCreating(true); setIsRemoveMode(false); }}
-                        className="h-auto p-10 sm:p-8 rounded-[2.5rem] border-dashed border-2 flex flex-col gap-3 hover:bg-muted/50 transition-all active:scale-95 border-slate-200 dark:border-slate-800 bg-transparent text-slate-900 dark:text-slate-100"
+                        className="h-auto p-8 rounded-3xl border-dashed border-2 flex flex-col gap-2 hover:bg-muted/50 transition-all active:scale-95 border-slate-200 dark:border-slate-800 bg-transparent text-slate-900 dark:text-slate-100"
                     >
-                        <UserPlus size={32} className="text-primary sm:size-6" />
-                        <span className="font-black text-xl sm:text-base">Add New Profile</span>
+                        <UserPlus size={24} className="text-primary" />
+                        <span className="font-bold">Add New Profile</span>
                     </Button>
                 )}
 

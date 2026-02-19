@@ -246,11 +246,11 @@ export default function QuizView({ quizId, title, questions }: QuizProps) {
 
       <Card className="flex-1 flex flex-col border-none shadow-none bg-transparent">
         <CardHeader className="px-0 pt-0">
-          <CardTitle className="text-2xl sm:text-2xl leading-snug font-bold">
+          <CardTitle className="text-xl sm:text-2xl leading-snug font-bold">
             {currentQuestion.text}
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-0 space-y-4 pt-4">
+        <CardContent className="px-0 space-y-3 pt-4">
           {options.map((option, idx) => {
             let state = "default";
             if (isAnswered) {
@@ -266,7 +266,7 @@ export default function QuizView({ quizId, title, questions }: QuizProps) {
                 key={idx}
                 onClick={() => handleSelect(idx)}
                 disabled={isAnswered}
-                className={`w-full p-6 sm:p-5 rounded-3xl sm:rounded-2xl border-2 text-left transition-all flex justify-between items-center ${
+                className={`w-full p-4 sm:p-5 rounded-2xl border-2 text-left transition-all flex justify-between items-center ${
                   state === "correct" ? "border-green-500 bg-green-50 dark:bg-green-950/30 text-green-900 dark:text-green-100 font-bold shadow-md" :
                   state === "incorrect" ? "border-red-500 bg-red-50 dark:bg-red-950/30 text-red-900 dark:text-red-100 font-bold" :
                   state === "selected" ? "border-primary bg-primary/5 shadow-md scale-[1.01]" :
@@ -275,8 +275,8 @@ export default function QuizView({ quizId, title, questions }: QuizProps) {
                 }`}
               >
                 <div className="flex gap-4 items-start">
-                    <span className="font-black opacity-30 text-lg sm:text-base">{String.fromCharCode(65 + idx)}.</span>
-                    <span className="font-bold text-lg sm:text-sm">{option}</span>
+                    <span className="font-black opacity-30">{String.fromCharCode(65 + idx)}.</span>
+                    <span className="font-semibold text-sm">{option}</span>
                 </div>
                 {state === "correct" && <CheckCircle2 size={20} className="text-green-600" />}
                 {state === "incorrect" && <XCircle size={20} className="text-red-600" />}
@@ -330,7 +330,7 @@ export default function QuizView({ quizId, title, questions }: QuizProps) {
 
           {!isAnswered ? (
             <Button 
-              className="w-full h-14 sm:h-16 text-lg sm:text-xl font-black rounded-3xl shadow-xl bg-primary text-primary-foreground" 
+              className="w-full h-16 text-xl font-black rounded-3xl shadow-xl bg-primary text-primary-foreground" 
               onClick={handleSubmit} 
               disabled={selectedIdx === null}
             >
@@ -338,7 +338,7 @@ export default function QuizView({ quizId, title, questions }: QuizProps) {
             </Button>
           ) : (
             <Button 
-                className="w-full h-14 sm:h-16 text-lg sm:text-xl font-black rounded-3xl shadow-xl bg-primary text-primary-foreground" 
+                className="w-full h-16 text-xl font-black rounded-3xl shadow-xl bg-primary text-primary-foreground" 
                 onClick={handleNext}
                 disabled={isSubmitting}
             >

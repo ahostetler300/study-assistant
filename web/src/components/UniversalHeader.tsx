@@ -21,13 +21,13 @@ export default function UniversalHeader() {
   if (pathname === "/") return null;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md px-5 h-20 sm:h-16 flex items-center justify-between shadow-sm">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md px-4 h-16 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-6">
           <Link href={user ? `/dashboard?userId=${user.id}` : "/"} className="flex items-center gap-2 group text-slate-900 dark:text-slate-100 no-underline">
-            <div className="bg-primary p-2 sm:p-1.5 rounded-xl sm:rounded-lg text-primary-foreground group-hover:scale-110 transition-transform shadow-md">
-              <BookOpen size={24} className="sm:size-5" />
+            <div className="bg-primary p-1.5 rounded-lg text-primary-foreground group-hover:scale-110 transition-transform shadow-md">
+              <BookOpen size={20} />
             </div>
-            <span className="font-black text-xl hidden sm:inline-block tracking-tight font-sans">Study Assistant</span>
+            <span className="font-bold hidden sm:inline-block tracking-tight font-sans">Study Assistant</span>
           </Link>
           
           {user && (
@@ -48,7 +48,7 @@ export default function UniversalHeader() {
           )}
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-1">
+        <div className="flex items-center gap-2">
           {user && (
             <div className="hidden sm:flex flex-col items-end mr-3 text-right">
               <span className="text-xs font-black text-slate-900 dark:text-slate-100 leading-none">{user.name}</span>
@@ -56,19 +56,17 @@ export default function UniversalHeader() {
             </div>
           )}
           
-          <div className="scale-125 sm:scale-100">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
 
           <Link href="/settings">
-            <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 sm:h-10 sm:w-10 hover:bg-primary/5 hover:text-primary transition-all">
-              <Settings size={24} className="sm:size-5" />
+            <Button variant="ghost" size="icon" className="rounded-2xl h-10 w-10 hover:bg-primary/5 hover:text-primary transition-all">
+              <Settings size={20} />
             </Button>
           </Link>
           
           <Link href="/">
-            <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 sm:h-10 sm:w-10 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-400">
-                <UserIcon size={24} className="sm:size-5" />
+            <Button variant="ghost" size="icon" className="rounded-2xl h-10 w-10 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-400">
+                <UserIcon size={20} />
             </Button>
           </Link>
         </div>
