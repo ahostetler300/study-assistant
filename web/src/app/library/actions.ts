@@ -8,6 +8,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { createId } from "@paralleldrive/cuid2";
 import { constants as fsConstants } from 'fs';
+import { resolveLocalPath } from "@/lib/pathUtils";
 
 const execPromise = promisify(exec);
 
@@ -117,7 +118,7 @@ export async function deleteFile(id: string) {
     const file = await prisma.file.findUnique({ where: { id } });
     
     if (file?.localPath) {
-      await unlink(file.localPath).catch(e => console.error(`Failed to delete local file ${file.localPath}:`, e));
+      await unlink(resolveLocalPath(file.localPath)).catch(e => console.error(`Failed to delete local file ${file.localPath}:`, e));
     }
     
     // Find associated study sets
@@ -169,7 +170,7 @@ export async function checkFileExistenceAction(fileId: string): Promise<{ status
     }
 
     try {
-      await access(fileRecord.localPath, fsConstants.F_OK | fsConstants.R_OK);
+      await access(resolveLocalPath(fileRecord.localPath), fsConstants.F_OK | fsConstants.R_OK);
       // If access is successful, update lastVerifiedAt
       await prisma.file.update({
         where: { id: fileId },

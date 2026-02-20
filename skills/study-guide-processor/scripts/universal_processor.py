@@ -117,7 +117,7 @@ def main():
         processed_file_path = process_file(input_path, output_dir, args.output_filename, md)
     
     if processed_file_path:
-        print(f"SUCCESS: {processed_file_path}") # Print the path for Node.js to capture
+        print(f"SUCCESS: {processed_file_path.relative_to(output_dir)}") # Print the relative path for Node.js to capture
         sys.exit(0)
     else:
         sys.exit(1)
