@@ -6,6 +6,7 @@ import { readFile } from "fs/promises";
 import { generateQuestions } from "@/lib/gemini";
 import type { Part } from "@google/generative-ai";
 import { getSystemPrompt, getHardcodedSchema } from "@/lib/prompts";
+import { resolveLocalPath } from "@/lib/pathUtils";
 
 interface GeminiQuestion {
     q: string;
@@ -60,7 +61,7 @@ export async function createStudySet(formData: FormData) {
         throw new Error(`File ${file.displayName || file.name} has no local path.`);
       }
       try {
-        const content = await readFile(file.localPath, 'utf-8');
+        const content = await readFile(resolveLocalPath(file.localPath), 'utf-8');
         contentParts.push({ text: content });
       } catch (readError: any) {
         if (readError.code === 'ENOENT') {
