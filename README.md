@@ -10,8 +10,9 @@ An AI-powered, family-oriented study mastery platform designed for the Raspberry
 - **Secure Vault**: AES-256-GCM encryption for API keys and sensitive data.
 - **Universal Ingestion**: Supports PDF, EPUB, DOCX, XLSX, Images (OCR), and Web Scraping.
 - **AI-Powered Tutoring**: Grounded, pedagogical deep-dives for every quiz question.
-- **PWA Support**: Installable on mobile with standalone mode and branded splash screens.
-- **Modern UI**: Apple-style aesthetic with glassmorphic elements and high-contrast accessibility.
+- **Structured Prompt Builder**: Configure AI question generation with adjustable difficulty, focus instructions, and source chapters.
+- **Detailed Study Set View**: Dedicated detail pages for study sets displaying source material and Gemini execution statistics.
+- **PWA & Responsive Design**: Installable on mobile with standalone mode, branded splash screens, and a highly responsive, Apple-style UI for all device sizes.
 
 ## 🛠️ Installation on Raspberry Pi
 

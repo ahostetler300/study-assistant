@@ -49,15 +49,24 @@ model File {
 }
 
 model StudySet {
-  id           String     @id @default(cuid())
-  title        String
-  instructions String?    // The user's focus instructions
-  category     Category?  @relation(fields: [categoryId], references: [id])
-  categoryId   String?
+  id                        String     @id @default(cuid())
+  title                     String
+  instructions              String?    @default("")
+  difficultyLevel           String?    @default("Medium")
+  specificChaptersSections  String?    @default("")
+  category                  Category?  @relation(fields: [categoryId], references: [id])
+  categoryId                String?
   files        File[]     // Multi-source grounding
   questions    Question[]
   quizzes      Quiz[]
   createdAt    DateTime   @default(now())
+
+  // Gemini Execution Statistics
+  geminiInputTokens         Int?
+  geminiOutputTokens        Int?
+  geminiCached              Boolean?
+  geminiCacheHit            Boolean?
+
 }
 
 model Question {

@@ -17,6 +17,8 @@ export async function createStudySet(formData: FormData) {
   const title = formData.get("title") as string;
   const instructions = formData.get("instructions") as string;
   const categoryId = formData.get("categoryId") as string;
+  const difficultyLevel = formData.get("difficultyLevel") as string;
+  const specificChaptersSections = formData.get("specificChaptersSections") as string;
   const count = formData.get("count") as string;
   const fileIds = formData.getAll("fileIds") as string[];
   const useCache = formData.get("useCache") === "true";
@@ -41,8 +43,10 @@ export async function createStudySet(formData: FormData) {
   const fullPrompt = `
     ${persona}
 
-    TASK: Generate exactly ${requestedCount} unique multiple-choice questions based on the provided documents.
-    FOCUS INSTRUCTIONS: ${instructions || "General summary of important concepts."}
+    TASK: Generate exactly ${requestedCount} unique multiple-choice questions based on the provided SOURCE documents.
+    - DIFFICULTY LEVEL: ${getDifficultyDescription(difficultyLevel)}
+    - FOCUS INSTRUCTIONS: ${instructions || "General summary of important concepts."}
+    - SOURCE CHAPTERS/SECTIONS: ${specificChaptersSections || "All source material"}
     
     ${schema}
   `;
@@ -99,7 +103,13 @@ export async function createStudySet(formData: FormData) {
       data: {
         title,
         instructions,
+        difficultyLevel,
+        specificChaptersSections,
         categoryId,
+        geminiInputTokens: usage.input,
+        geminiOutputTokens: usage.output,
+        geminiCached: usage.cached,
+        geminiCacheHit: usage.isHit,
         files: { connect: files.map(f => ({ id: f.id })) },
         questions: {
           create: questionsData.map((q) => ({
@@ -198,13 +208,16 @@ export async function deleteQuestionAction(id: string, studySetId: string) {
     }
 }
 
-export async function updateSetMetadata(id: string, data: { title: string; categoryId: string | null }) {
+export async function updateSetMetadata(id: string, data: { title: string; categoryId: string | null; instructions: string; difficultyLevel: string; specificChaptersSections: string }) {
     try {
         await prisma.studySet.update({
             where: { id },
             data: {
                 title: data.title,
-                categoryId: data.categoryId
+                categoryId: data.categoryId,
+                instructions: data.instructions,
+                difficultyLevel: data.difficultyLevel,
+                specificChaptersSections: data.specificChaptersSections
             }
         });
         revalidatePath("/study-sets");
@@ -249,3 +262,17 @@ function salvageJson(jsonStr: string): string | null {
         }
     }
 }
+
+function getDifficultyDescription(level: string): string {
+  switch (level) {
+    case "Easy":
+      return "Focus on direct recall of facts, definitions, or basic comprehension.";
+    case "Medium":
+      return "Require application of concepts, analysis of examples, or understanding of relationships.";
+    case "Hard":
+      return "Demand synthesis of information, evaluation of scenarios, or critical thinking.";
+    default:
+      return "General summary of important concepts.";
+  }
+}
+

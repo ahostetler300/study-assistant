@@ -1,14 +1,15 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { SetEditor } from "./SetEditor";
+import { SetEditor } from "../[id]/edit/SetEditor"; // Import SetEditor from the correct path
 
-export default async function EditStudySetPage({ params }: { params: { id: string } }) {
+export default async function StudySetDetailsPage({ params }: { params: { id: string } }) {
   const studySet = await prisma.studySet.findUnique({
     where: { id: params.id },
     include: {
       questions: true,
       category: true,
-      files: true,
+      files: true, // Include files for display
+
     },
   });
 
@@ -25,9 +26,13 @@ export default async function EditStudySetPage({ params }: { params: { id: strin
         instructions: studySet.instructions || "",
         difficultyLevel: studySet.difficultyLevel || "Medium",
         specificChaptersSections: studySet.specificChaptersSections || "",
+        geminiInputTokens: studySet.geminiInputTokens || null,
+        geminiOutputTokens: studySet.geminiOutputTokens || null,
+        geminiCached: studySet.geminiCached || false,
+        geminiCacheHit: studySet.geminiCacheHit || false,
       }} 
       categories={categories}
-      isEditing={true} // Pass isEditing as true for the edit view
+      isEditing={false} // Pass isEditing as false for the detail view
     />
   );
 }

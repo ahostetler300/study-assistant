@@ -4,11 +4,17 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Save, ChevronLeft, CheckCircle2, AlertTriangle, Edit2, X, Loader2 } from "lucide-react";
+import { Trash2, Save, ChevronLeft, CheckCircle2, AlertTriangle, Edit2, X, Loader2, BookText, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { updateQuestionAction, deleteQuestionAction, updateSetMetadata } from "../../actions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+interface File {
+    id: string;
+    name: string;
+    displayName: string | null;
+}
 
 interface Question {
     id: string;
@@ -22,16 +28,28 @@ interface SetEditorProps {
     studySet: {
         id: string;
         title: string;
+        instructions: string;
         categoryId: string | null;
+        difficultyLevel: string;
+        specificChaptersSections: string;
         questions: Question[];
+        files: File[];
+        geminiInputTokens?: number | null;
+        geminiOutputTokens?: number | null;
+        geminiCached?: boolean | null;
+        geminiCacheHit?: boolean | null;
     };
     categories: { id: string; name: string }[];
+    isEditing: boolean;
 }
 
-export function SetEditor({ studySet, categories }: SetEditorProps) {
+export function SetEditor({ studySet, categories, isEditing }: SetEditorProps) {
     const router = useRouter();
     const [title, setTitle] = useState(studySet.title);
+    const [instructions, setInstructions] = useState(studySet.instructions);
     const [categoryId, setCategoryId] = useState(studySet.categoryId || "none");
+    const [difficultyLevel, setDifficultyLevel] = useState(studySet.difficultyLevel || "Medium");
+    const [specificChaptersSections, setSpecificChaptersSections] = useState(studySet.specificChaptersSections || "");
     const [questions, setQuestions] = useState(studySet.questions);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isSavingMetadata, setIsSavingMetadata] = useState(false);
@@ -40,13 +58,28 @@ export function SetEditor({ studySet, categories }: SetEditorProps) {
     async function handleSaveMetadata() {
         setIsSavingMetadata(true);
         const res = await updateSetMetadata(studySet.id, { 
-            title, 
-            categoryId: categoryId === "none" ? null : categoryId 
+            title,
+            instructions,
+            categoryId: categoryId === "none" ? null : categoryId,
+            difficultyLevel,
+            specificChaptersSections
         });
         setIsSavingMetadata(false);
         if (res.success) toast.success("Set details updated");
         else toast.error(res.error);
     }
+
+    const difficultyOptions = [
+        { value: "Easy", label: "Easy" },
+        { value: "Medium", label: "Medium" },
+        { value: "Hard", label: "Hard" },
+    ];
+
+    const displayValue = (value: string | null | undefined, defaultValue: string = "N/A") => {
+        return value && value.trim() !== "" ? value : defaultValue;
+    };
+
+    const categoryName = categories.find(c => c.id === categoryId)?.name || "General";
 
     return (
         <div className="flex flex-col gap-8 pb-32 p-4 max-w-4xl mx-auto pt-6 text-slate-900 dark:text-slate-100 font-sans">
@@ -78,11 +111,93 @@ export function SetEditor({ studySet, categories }: SetEditorProps) {
                             </Select>
                         </div>
                     </div>
-                    <Button onClick={handleSaveMetadata} disabled={isSavingMetadata} className="w-full h-12 rounded-2xl font-black shadow-lg">
-                        {isSavingMetadata ? "Saving..." : "Update Set Details"}
-                    </Button>
+
+                    {/* Specific Chapters / Sections */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Specific Chapters / Sections</label>
+                        {isEditing ? (
+                            <Input
+                                value={specificChaptersSections}
+                                onChange={(e) => setSpecificChaptersSections(e.target.value)}
+                                className="h-12 rounded-2xl border-2 font-bold"
+                                placeholder="e.g., Chapter 1-3, Section 2.1"
+                            />
+                        ) : (
+                            <p className="text-sm font-medium p-3 rounded-2xl bg-muted/50 border border-border text-muted-foreground">
+                                {displayValue(studySet.specificChaptersSections, "All source material")}
+                            </p>
+                        )}
+                    </div>
+                    {/* Focus Instructions */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Focus Instructions</label>
+                        {isEditing ? (
+                            <textarea
+                                value={instructions}
+                                onChange={(e) => setInstructions(e.target.value)}
+                                className="w-full min-h-[80px] p-4 rounded-2xl bg-background border-2 font-medium focus:outline-none focus:border-primary transition-colors resize-none"
+                            />
+                        ) : (
+                            <p className="text-sm font-medium p-3 rounded-2xl bg-muted/50 border border-border text-muted-foreground min-h-[80px]">
+                                {displayValue(studySet.instructions, "General summary of important concepts.")}
+                            </p>
+                        )}
+                    </div>
+                    {/* Difficulty Level */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Difficulty Level</label>
+                        {isEditing ? (
+                            <Select value={difficultyLevel} onValueChange={setDifficultyLevel}>
+                                <SelectTrigger className="h-12 rounded-2xl border-2 font-bold">
+                                    <SelectValue placeholder="Select Difficulty" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Easy">Easy</SelectItem>
+                                    <SelectItem value="Medium">Medium</SelectItem>
+                                    <SelectItem value="Hard">Hard</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        ) : (
+                            <p className="text-sm font-medium p-3 rounded-2xl bg-muted/50 border border-border text-muted-foreground">
+                                {displayValue(difficultyLevel, "Medium")}
+                            </p>
+                        )}
+                    </div>
+                    {isEditing && ( // Only show button if in editing mode
+                        <Button onClick={handleSaveMetadata} disabled={isSavingMetadata} className="w-full h-12 rounded-2xl font-black shadow-lg">
+                            {isSavingMetadata ? "Saving..." : "Update Set Details"}
+                        </Button>
+                    )}
                 </div>
             </header>
+
+            {studySet.files && studySet.files.length > 0 && (
+                <div className="bg-card border rounded-3xl p-6 shadow-sm space-y-3">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Source Material</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {studySet.files.map(file => (
+                            <div key={file.id} className="flex items-center gap-2 p-2 rounded-xl bg-muted/50 border border-border">
+                                <BookText size={16} className="text-muted-foreground" />
+                                <span className="text-sm font-medium truncate">{file.displayName || file.name}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {studySet.geminiInputTokens !== undefined && studySet.geminiInputTokens !== null && (
+                <div className="bg-card border rounded-3xl p-6 shadow-sm space-y-3">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                        <Sparkles size={16} /> Gemini Execution Stats
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm font-medium">
+                        <p>Input Tokens: {studySet.geminiInputTokens || "N/A"}</p>
+                        <p>Output Tokens: {studySet.geminiOutputTokens || "N/A"}</p>
+                        <p>Cached: {studySet.geminiCached ? "Yes" : "No"}</p>
+                        <p>Cache Hit: {studySet.geminiCacheHit ? "Yes" : "No"}</p>
+                    </div>
+                </div>
+            )}
 
             <div className="space-y-6">
                 <div className="flex items-center justify-between px-2">

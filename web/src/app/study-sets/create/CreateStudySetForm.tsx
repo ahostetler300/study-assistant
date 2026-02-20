@@ -24,6 +24,8 @@ export default function CreateStudySetForm() {
   
   const [title, setTitle] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [difficultyLevel, setDifficultyLevel] = useState("Medium");
+  const [specificChaptersSections, setSpecificChaptersSections] = useState("");
   const [count, setCount] = useState(10);
 
   useEffect(() => {
@@ -66,6 +68,8 @@ export default function CreateStudySetForm() {
     formData.append("categoryId", selectedCategory);
     formData.append("count", count.toString());
     formData.append("useCache", useCache.toString());
+    formData.append("difficultyLevel", difficultyLevel);
+    formData.append("specificChaptersSections", specificChaptersSections);
     selectedFiles.forEach(id => formData.append("fileIds", id));
 
     try {
@@ -176,6 +180,15 @@ export default function CreateStudySetForm() {
                     </div>
 
                     <div className="space-y-2">
+                        <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Specific Chapters / Sections</label>
+                        <Input
+                            placeholder="e.g., Chapter 1-3, Section 2.1"
+                            value={specificChaptersSections}
+                            onChange={(e) => setSpecificChaptersSections(e.target.value)}
+                            className="h-12 rounded-xl border-2"
+                        />
+                    </div>
+                    <div className="space-y-2">
                         <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Detailed Instructions</label>
                         <textarea 
                             placeholder="Describe what content you want to focus on..." 
@@ -184,6 +197,19 @@ export default function CreateStudySetForm() {
                             className="w-full min-h-[150px] p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 text-sm leading-relaxed focus:outline-none focus:border-primary transition-colors resize-none"
                             required
                         />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Difficulty Level</label>
+                        <Select value={difficultyLevel} onValueChange={setDifficultyLevel}>
+                            <SelectTrigger className="h-12 rounded-xl border-2">
+                                <SelectValue placeholder="Select Difficulty" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Easy">Easy</SelectItem>
+                                <SelectItem value="Medium">Medium</SelectItem>
+                                <SelectItem value="Hard">Hard</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="space-y-4">
