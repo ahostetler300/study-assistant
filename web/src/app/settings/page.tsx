@@ -288,7 +288,7 @@ export default function SettingsPage() {
                                         <div className="h-2 w-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
                                         <div className="flex flex-col">
                                             <span className="font-bold text-slate-900 dark:text-slate-100">{cache.displayName}</span>
-                                            <span className="text-[9px] opacity-60 uppercase tracking-tighter">{(cache.usageMetadata?.totalTokenCount / 1000).toFixed(0)}k tokens • {cache.model.split('/').pop()}</span>
+                                             <span className="text-[9px] opacity-60 uppercase tracking-tighter">{(cache.usageMetadata?.totalTokenCount / 1000).toFixed(0)}k tokens • {cache.model ? cache.model.split('/').pop() : 'Unknown Model'}</span>
                                         </div>
                                     </div>
                                     <div className="text-right">

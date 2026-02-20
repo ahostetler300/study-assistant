@@ -18,11 +18,6 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Study Assistant",
   description: "AI-powered study assistant for your family.",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Study Assistant",
-  },
 };
 
 export const viewport: Viewport = {

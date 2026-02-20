@@ -56,32 +56,41 @@ export default async function StudySetsPage({ searchParams }: { searchParams: { 
           </Card>
         ) : (
           studySets.map((set) => (
-            <Link key={set.id} href={`/study-sets/${set.id}`}>
-              <Card className="overflow-hidden rounded-3xl border-slate-200/60 dark:border-slate-800/60 bg-card shadow-sm hover:shadow-md transition-all group cursor-pointer">
-                <CardContent className="p-5 flex items-center justify-between">
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="bg-indigo-500/10 p-3 rounded-2xl text-indigo-600 shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                      <HelpCircle size={24} />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <h3 className="font-bold text-sm truncate pr-2">
-                        {set.title}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                          {set.category && (
-                              <span className="text-[10px] bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1">
-                                  <Tag size={8} /> {set.category.name}
-                              </span>
-                          )}
-                          <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">
-                              {set._count.questions} Questions
-                          </span>
-                      </div>
+            <Card key={set.id} className="overflow-hidden rounded-3xl border-slate-200/60 dark:border-slate-800/60 bg-card shadow-sm hover:shadow-md transition-all group">
+              <CardContent className="p-5 flex items-center justify-between">
+                <Link href={`/study-sets/${set.id}`} className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer">
+                  <div className="bg-indigo-500/10 p-3 rounded-2xl text-indigo-600 shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <HelpCircle size={24} />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <h3 className="font-bold text-sm truncate pr-2">
+                      {set.title}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                        {set.category && (
+                            <span className="text-[10px] bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1">
+                                <Tag size={8} /> {set.category.name}
+                            </span>
+                        )}
+                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">
+                            {set._count.questions} Questions
+                        </span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </Link>
+                </Link>
+                <ManagementActions 
+                    id={set.id} 
+                    currentName={set.title} 
+                    type="StudySet" 
+                    onRename={renameStudySet} 
+                    onDelete={deleteStudySet}
+                    categories={categories} // Pass categories for rename dialog if needed
+                    currentCategoryId={set.categoryId} // Pass current category ID
+                    warningText="Deleting this Study Set will also delete all associated Questions and Quizzes."
+                    hideRename={true}
+                />
+              </CardContent>
+            </Card>
           ))
         )}
       </div>

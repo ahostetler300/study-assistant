@@ -1,10 +1,10 @@
 import prisma from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileIcon, FileText, PlusCircle, Tag } from "lucide-react";
+import { FileIcon, FileText, PlusCircle, Tag, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ManagementActions } from "@/components/ManagementActions";
-import { deleteFile, updateFile } from "./actions";
+import { deleteFile, updateFile, checkFileExistenceAction } from "./actions";
 
 export default async function LibraryPage({ searchParams }: { searchParams: { categoryId?: string } }) {
   const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
@@ -14,6 +14,16 @@ export default async function LibraryPage({ searchParams }: { searchParams: { ca
     include: { category: true },
     orderBy: { createdAt: "desc" },
   });
+
+  // Check file existence
+  const filesWithStatus = await Promise.all(files.map(async (file) => {
+    let status: 'verified' | 'missing' | 'unreadable' = 'verified';
+    if (file.localPath) { // Only check if localPath exists
+      const result = await checkFileExistenceAction(file.id);
+      status = result.status;
+    }
+    return { ...file, status };
+  }));
 
   return (
     <div className="flex flex-col gap-6 pb-24 p-4 max-w-4xl mx-auto pt-6 text-slate-900 dark:text-slate-100 font-sans">
@@ -46,7 +56,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: { ca
       </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {files.length === 0 ? (
+        {filesWithStatus.length === 0 ? (
           <Card className="col-span-full border-dashed border-2 bg-muted/20 rounded-3xl">
             <CardContent className="flex flex-col items-center justify-center p-16 text-muted-foreground">
               <FileIcon size={64} className="mb-4 opacity-10" />
@@ -55,7 +65,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: { ca
             </CardContent>
           </Card>
         ) : (
-          files.map((file) => (
+          filesWithStatus.map((file) => (
             <Card key={file.id} className="overflow-hidden rounded-3xl border-slate-200/60 dark:border-slate-800/60 bg-card shadow-sm hover:shadow-md transition-all">
               <CardContent className="p-5 flex items-center justify-between">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -75,6 +85,11 @@ export default async function LibraryPage({ searchParams }: { searchParams: { ca
                         <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">
                             {(file.size / 1024 / 1024).toFixed(2)} MB
                         </span>
+                        {file.status !== 'verified' && (
+                            <span className="text-[10px] bg-red-500/10 text-red-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1">
+                                <AlertTriangle size={8} /> {file.status === 'missing' ? 'Missing' : 'Unreadable'}
+                            </span>
+                        )}
                     </div>
                   </div>
                 </div>

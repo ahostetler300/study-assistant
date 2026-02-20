@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
+import { readFile } from "fs/promises";
 import { generateQuestions } from "@/lib/gemini";
+import type { Part } from "@google/generative-ai";
 import { getSystemPrompt, getHardcodedSchema } from "@/lib/prompts";
 
 interface GeminiQuestion {
@@ -52,9 +54,24 @@ export async function createStudySet(formData: FormData) {
   `;
 
   try {
-    const fileUris = files.map(f => f.geminiFileUri).filter(Boolean) as string[];
+    const contentParts: Part[] = [];
+    for (const file of files) {
+      if (!file.localPath) {
+        throw new Error(`File ${file.displayName || file.name} has no local path.`);
+      }
+      try {
+        const content = await readFile(file.localPath, 'utf-8');
+        contentParts.push({ text: content });
+      } catch (readError: any) {
+        if (readError.code === 'ENOENT') {
+          throw new Error(`Local file not found for ${file.displayName || file.name} at ${file.localPath}`);
+        }
+        throw readError;
+      }
+    }
+
     const { text: responseText, usage } = await generateQuestions({
-        fileUris,
+        contents: contentParts,
         prompt: fullPrompt,
         useCache,
         fileIds
@@ -105,11 +122,12 @@ export async function createStudySet(formData: FormData) {
         instructions,
         difficultyLevel,
         specificChaptersSections,
-        categoryId,
+        category: { connect: { id: categoryId } },
         geminiInputTokens: usage.input,
         geminiOutputTokens: usage.output,
         geminiCached: usage.cached,
         geminiCacheHit: usage.isHit,
+        geminiCachedTokens: usage.cachedTokens,
         files: { connect: files.map(f => ({ id: f.id })) },
         questions: {
           create: questionsData.map((q) => ({

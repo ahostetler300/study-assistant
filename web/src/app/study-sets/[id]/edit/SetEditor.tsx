@@ -38,6 +38,7 @@ interface SetEditorProps {
         geminiOutputTokens?: number | null;
         geminiCached?: boolean | null;
         geminiCacheHit?: boolean | null;
+        geminiCachedTokens?: number | null;
     };
     categories: { id: string; name: string }[];
     isEditing: boolean;
@@ -195,6 +196,10 @@ export function SetEditor({ studySet, categories, isEditing }: SetEditorProps) {
                         <p>Output Tokens: {studySet.geminiOutputTokens || "N/A"}</p>
                         <p>Cached: {studySet.geminiCached ? "Yes" : "No"}</p>
                         <p>Cache Hit: {studySet.geminiCacheHit ? "Yes" : "No"}</p>
+                        {studySet.geminiInputTokens !== undefined && studySet.geminiInputTokens !== null &&
+                         studySet.geminiCachedTokens !== undefined && studySet.geminiCachedTokens !== null && (
+                            <p>New Tokens: {studySet.geminiInputTokens - studySet.geminiCachedTokens}</p>
+                        )}
                     </div>
                 </div>
             )}

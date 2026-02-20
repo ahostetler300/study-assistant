@@ -2,11 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
-import { uploadToGemini, deleteFromGemini } from "@/lib/gemini";
-import { writeFile, mkdir, unlink, readFile } from "fs/promises";
+import { writeFile, mkdir, unlink, readFile, access } from "fs/promises";
 import { join } from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { createId } from "@paralleldrive/cuid2";
+import { constants as fsConstants } from 'fs';
 
 const execPromise = promisify(exec);
 
@@ -20,66 +21,85 @@ export async function uploadFile(formData: FormData) {
   const buffer = Buffer.from(bytes);
 
   const uploadDir = join(process.cwd(), "..", "data", "uploads");
-  const processedDir = join(process.cwd(), "..", "data", "processed_content");
+  const processedContentDir = join(process.cwd(), "..", "data", "processed_content");
   await mkdir(uploadDir, { recursive: true });
-  await mkdir(processedDir, { recursive: true });
+  await mkdir(processedContentDir, { recursive: true });
 
   const inputPath = join(uploadDir, file.name);
   await writeFile(inputPath, buffer);
 
+  const newFileId = createId(); 
+  const outputFilename = `${newFileId}.md`;
+
   try {
     const skillScript = join(process.cwd(), "..", "skills", "study-guide-processor", "scripts", "universal_processor.py");
-    await execPromise(`ONNXRUNTIME_LOGGER_SEVERITY=3 python3 "${skillScript}" "${inputPath}" "${processedDir}"`);
+    const { stdout, stderr } = await execPromise(`python3 "${skillScript}" "${inputPath}" "${outputFilename}" --output_dir "${processedContentDir}"`);
 
-    const mdFileName = `${file.name.replace(/\.[^/.]+$/, "")}.md`;
-    const mdPath = join(processedDir, mdFileName);
-    const geminiFile = await uploadToGemini(mdPath, "text/markdown");
+    if (stderr) console.error("Python script STDERR:", stderr);
+
+    const match = stdout.match(/SUCCESS: (.*)/);
+    if (!match) {
+        throw new Error(`Python script did not return success path. STDOUT: ${stdout}`);
+    }
+    const localPath = match[1].trim();
 
     const dbFile = await prisma.file.create({
       data: {
+        id: newFileId,
         name: file.name,
         displayName: displayName || file.name.replace(/\.[^/.]+$/, ""),
-        geminiFileUri: geminiFile.uri,
+        localPath: localPath,
         mimeType: file.type,
         size: file.size,
         categoryId: categoryId || null,
+        lastVerifiedAt: new Date(),
       },
     });
 
-    await unlink(inputPath);
+    await unlink(inputPath); 
+    
     revalidatePath("/library");
     return { success: true, file: dbFile };
   } catch (error: unknown) {
     console.error("Upload error:", error);
-    return { error: "Failed to process or upload file" };
+    await unlink(inputPath).catch(e => console.error("Failed to delete input file on error:", e)); 
+    const msg = error instanceof Error ? error.message : "Failed to process or upload file";
+    return { error: msg };
   }
 }
 
 export async function uploadFromUrl(url: string, displayName?: string, categoryId?: string) {
   if (!url) return { error: "No URL provided" };
 
+  const processedContentDir = join(process.cwd(), "..", "data", "processed_content");
+  await mkdir(processedContentDir, { recursive: true });
+
+  const newFileId = createId();
+  const outputFilename = `${newFileId}.md`;
+
   try {
-    const processedDir = join(process.cwd(), "..", "data", "processed_content");
-    await mkdir(processedDir, { recursive: true });
-
     const skillScript = join(process.cwd(), "..", "skills", "study-guide-processor", "scripts", "universal_processor.py");
-    const { stdout } = await execPromise(`ONNXRUNTIME_LOGGER_SEVERITY=3 python3 "${skillScript}" "${url}" "${processedDir}"`);
+    const { stdout, stderr } = await execPromise(`python3 "${skillScript}" "${url}" "${outputFilename}" --output_dir "${processedContentDir}"`);
     
-    const match = stdout.match(/✓ Saved to: (.*\.md)/);
-    if (!match) throw new Error("Could not determine processed filename");
-    const mdFileName = match[1].trim();
-    const mdPath = join(processedDir, mdFileName);
+    if (stderr) console.error("Python script STDERR:", stderr);
 
-    const geminiFile = await uploadToGemini(mdPath, "text/markdown");
-    const fileStats = await readFile(mdPath);
+    const match = stdout.match(/SUCCESS: (.*)/);
+    if (!match) {
+        throw new Error(`Python script did not return success path. STDOUT: ${stdout}`);
+    }
+    const localPath = match[1].trim();
+    const fileStats = await readFile(localPath); // Read the newly created file to get its size
+
     const dbFile = await prisma.file.create({
       data: {
-        name: mdFileName,
-        displayName: displayName || mdFileName.replace(".md", ""),
-        geminiFileUri: geminiFile.uri,
-        mimeType: "text/markdown",
+        id: newFileId,
+        name: new URL(url).hostname, // Use hostname as default name
+        displayName: displayName || new URL(url).hostname,
+        localPath: localPath,
+        mimeType: "text/markdown", // Assuming URL always processes to markdown
         size: fileStats.length,
         categoryId: categoryId || null,
+        lastVerifiedAt: new Date(),
       },
     });
 
@@ -95,9 +115,9 @@ export async function uploadFromUrl(url: string, displayName?: string, categoryI
 export async function deleteFile(id: string) {
   try {
     const file = await prisma.file.findUnique({ where: { id } });
-    if (file?.geminiFileUri) {
-      const fileName = file.geminiFileUri.split('/').pop();
-      if (fileName) await deleteFromGemini(fileName);
+    
+    if (file?.localPath) {
+      await unlink(file.localPath).catch(e => console.error(`Failed to delete local file ${file.localPath}:`, e));
     }
     
     // Find associated study sets
@@ -139,4 +159,31 @@ export async function updateFile(id: string, newName: string, categoryId?: strin
 
 export async function renameFile(id: string, newName: string) {
     return updateFile(id, newName);
+}
+
+export async function checkFileExistenceAction(fileId: string): Promise<{ status: 'verified' | 'missing' | 'unreadable' }> {
+  try {
+    const fileRecord = await prisma.file.findUnique({ where: { id: fileId } });
+    if (!fileRecord || !fileRecord.localPath) {
+      return { status: 'missing' };
+    }
+
+    try {
+      await access(fileRecord.localPath, fsConstants.F_OK | fsConstants.R_OK);
+      // If access is successful, update lastVerifiedAt
+      await prisma.file.update({
+        where: { id: fileId },
+        data: { lastVerifiedAt: new Date() }
+      });
+      return { status: 'verified' };
+    } catch (fsError: any) {
+      if (fsError.code === 'ENOENT') {
+        return { status: 'missing' };
+      }
+      return { status: 'unreadable' };
+    }
+  } catch (error) {
+    console.error(`Error checking file existence for ${fileId}:`, error);
+    return { status: 'unreadable' };
+  }
 }

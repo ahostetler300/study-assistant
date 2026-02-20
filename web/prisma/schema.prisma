@@ -32,17 +32,17 @@ model File {
   id            String         @id @default(cuid())
   name          String
   displayName   String?
-  geminiFileUri String?
+  localPath     String?
   mimeType      String
   size          Int
   category      Category?      @relation(fields: [categoryId], references: [id])
   categoryId    String?
   studySets     StudySet[]
-  
-  // Caching Metadata
-  cacheName         String?
-  cacheExpiresAt    DateTime?
-  contextTokenCount Int?
+
+  // Gemini CachedContents Metadata
+  geminiCacheId        String?
+  geminiCacheExpiresAt DateTime?
+  lastVerifiedAt       DateTime?
 
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -66,6 +66,7 @@ model StudySet {
   geminiOutputTokens        Int?
   geminiCached              Boolean?
   geminiCacheHit            Boolean?
+  geminiCachedTokens        Int?
 
 }
 

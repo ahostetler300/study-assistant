@@ -9,7 +9,6 @@ export default async function StudySetDetailsPage({ params }: { params: { id: st
       questions: true,
       category: true,
       files: true, // Include files for display
-
     },
   });
 
@@ -30,6 +29,7 @@ export default async function StudySetDetailsPage({ params }: { params: { id: st
         geminiOutputTokens: studySet.geminiOutputTokens || null,
         geminiCached: studySet.geminiCached || false,
         geminiCacheHit: studySet.geminiCacheHit || false,
+        geminiCachedTokens: studySet.geminiCachedTokens || null, // Pass geminiCachedTokens
       }} 
       categories={categories}
       isEditing={false} // Pass isEditing as false for the detail view

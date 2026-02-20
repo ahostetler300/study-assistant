@@ -23,9 +23,10 @@ interface ManagementActionsProps {
     editHref?: string;
     categories?: Category[];
     currentCategoryId?: string | null;
+    hideRename?: boolean;
 }
 
-export function ManagementActions({ id, currentName, type, onRename, onDelete, warningText, editHref, categories, currentCategoryId }: ManagementActionsProps) {
+export function ManagementActions({ id, currentName, type, onRename, onDelete, warningText, editHref, categories, currentCategoryId, hideRename }: ManagementActionsProps) {
     const router = useRouter();
     const [isRenaming, setIsRenaming] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -60,21 +61,23 @@ export function ManagementActions({ id, currentName, type, onRename, onDelete, w
 
     return (
         <div className="flex gap-1">
-            <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10"
-                onClick={() => { 
-                    if (editHref) {
-                        router.push(editHref);
-                    } else {
-                        setNewName(currentName); 
-                        setIsRenaming(true); 
-                    }
-                }}
-            >
-                <Edit2 size={16} />
-            </Button>
+            { !hideRename && (
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10"
+                    onClick={() => { 
+                        if (editHref) {
+                            router.push(editHref);
+                        } else {
+                            setNewName(currentName); 
+                            setIsRenaming(true); 
+                        }
+                    }}
+                >
+                    <Edit2 size={16} />
+                </Button>
+            )}
 
             <Button 
                 variant="ghost" 

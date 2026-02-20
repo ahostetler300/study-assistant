@@ -52,8 +52,8 @@ export async function purgeAllCaches() {
     try {
         await prisma.file.updateMany({
             data: {
-                cacheName: null,
-                cacheExpiresAt: null
+                geminiCacheId: null,
+                geminiCacheExpiresAt: null
             }
         });
         revalidatePath("/settings");
@@ -65,27 +65,29 @@ export async function purgeAllCaches() {
 
 export async function getActiveCaches() {
     try {
-        const { getApiKey } = await import("@/lib/gemini");
-        const { GoogleAICacheManager } = await import("@google/generative-ai/server");
-        
-        const apiKey = await getApiKey();
-        const cacheManager = new GoogleAICacheManager(apiKey, { apiVersion: 'v1beta' });
-        
-        const response = await cacheManager.list();
-        const caches = response.cachedContents || [];
-        
-        // Enrich with file display names from our DB
-        const enriched = await Promise.all(caches.map(async (c: any) => {
-            const file = await prisma.file.findFirst({
-                where: { cacheName: c.name }
-            });
-            return {
-                name: c.name,
-                displayName: file?.displayName || file?.name || "System Cache",
-                expireTime: c.expireTime,
-                model: c.model,
-                usageMetadata: c.usageMetadata
-            };
+        const modelSetting = await prisma.systemSetting.findUnique({ where: { key: "gemini_model" } });
+        const selectedModel = modelSetting?.value || "gemini-2.5-flash";
+
+        const filesWithActiveCache = await prisma.file.findMany({
+            where: {
+                geminiCacheId: { not: null },
+                geminiCacheExpiresAt: { gt: new Date() }
+            },
+            select: {
+                id: true,
+                displayName: true,
+                name: true,
+                geminiCacheId: true,
+                geminiCacheExpiresAt: true,
+            }
+        });
+
+        // Map to a user-friendly format (similar to what was returned before)
+        const enriched = filesWithActiveCache.map(file => ({
+            name: file.geminiCacheId!,
+            displayName: file.displayName || file.name || `Cache for File ${file.id}`,
+            expireTime: file.geminiCacheExpiresAt,
+            model: selectedModel, // Add the selected model here
         }));
 
         return enriched;
