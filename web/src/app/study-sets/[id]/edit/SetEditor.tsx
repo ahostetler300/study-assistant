@@ -113,6 +113,19 @@ export function SetEditor({ studySet, categories, isEditing }: SetEditorProps) {
                         </div>
                     </div>
 
+                    <div className="flex justify-end -mt-4">
+                        <Button 
+                            onClick={handleSaveMetadata} 
+                            disabled={isSavingMetadata} 
+                            size="sm" 
+                            variant="secondary"
+                            className="h-8 px-4 rounded-xl font-bold gap-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-indigo-200/50"
+                        >
+                            {isSavingMetadata ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
+                            Save Info
+                        </Button>
+                    </div>
+
                     {/* Specific Chapters / Sections */}
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Specific Chapters / Sections</label>

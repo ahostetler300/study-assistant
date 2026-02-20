@@ -198,3 +198,28 @@ export const generateQuestions = async (options: GenerateOptions): Promise<AIRes
     throw error;
   }
 };
+
+export const rewritePrompt = async (prompt: string): Promise<string | null> => {
+  try {
+    const apiKey = await getApiKey();
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    // Use the model configured in settings
+    const modelSetting = await prisma.systemSetting.findUnique({ where: { key: "gemini_model" } }); 
+    const modelName = modelSetting?.value || "gemini-2.5-flash"; 
+
+    const model = genAI.getGenerativeModel({ 
+      model: modelName,
+      generationConfig: {
+        maxOutputTokens: 8192,
+      }
+    });
+
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    return response.text();
+  } catch (error) {
+    console.error("Error rewriting prompt with Gemini:", error);
+    return null;
+  }
+};

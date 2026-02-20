@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, Loader2, X, Plus, BookText, ListOrdered, Tag, CheckCircle2 } from "lucide-react";
+import { Sparkles, Loader2, X, Plus, BookText, ListOrdered, Tag, CheckCircle2, Sparkle } from "lucide-react";
 import { createStudySet } from "../actions";
 import { toast } from "sonner";
 
@@ -20,6 +20,7 @@ export default function CreateStudySetForm() {
   const [newCategory, setNewCategory] = useState("");
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [isRewritingPrompt, setIsRewritingPrompt] = useState(false);
   const [useCache, setUseCache] = useState(false);
   
   const [title, setTitle] = useState("");
@@ -49,6 +50,61 @@ export default function CreateStudySetForm() {
     setSelectedCategory(cat.id);
     setNewCategory("");
     setIsCreatingCategory(false);
+  }
+
+  async function handleRewritePrompt() {
+    if (selectedFiles.length === 0) {
+        toast.error("Please select at least one source file.");
+        return;
+    }
+    if (!selectedCategory || selectedCategory === "all") {
+        toast.error("Please select a target category.");
+        return;
+    }
+    if (instructions.trim().split(/\s+/).length < 4) {
+        toast.error("Please enter at least 4 words for the prompt.");
+        return;
+    }
+
+    setIsRewritingPrompt(true);
+    const toastId = toast.loading("Rewriting prompt...");
+
+    try {
+        const selectedFileNames = selectedFiles
+            .map(id => {
+                const file = files.find(f => f.id === id);
+                return file ? (file.displayName || file.name) : null;
+            })
+            .filter(name => name !== null)
+            .join(", ");
+
+        const selectedCategoryObject = categories.find(c => c.id === selectedCategory);
+        const selectedCategoryName = selectedCategoryObject ? selectedCategoryObject.name : "Uncategorized";
+
+        const response = await fetch("/api/prompt-rewrite", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                userPrompt: instructions,
+                fileNames: selectedFileNames,
+                subject: selectedCategoryName,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.rewrittenPrompt) {
+            setInstructions(data.rewrittenPrompt);
+            toast.success("Prompt rewritten successfully!", { id: toastId });
+        } else {
+            toast.error(data.error || "Failed to rewrite prompt.", { id: toastId });
+        }
+    } catch (error) {
+        console.error("Prompt rewrite error:", error);
+        toast.error("An unexpected error occurred.", { id: toastId });
+    } finally {
+        setIsRewritingPrompt(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -190,13 +246,29 @@ export default function CreateStudySetForm() {
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Detailed Instructions</label>
-                        <textarea 
-                            placeholder="Describe what content you want to focus on..." 
-                            value={instructions}
-                            onChange={(e) => setInstructions(e.target.value)}
-                            className="w-full min-h-[150px] p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 text-sm leading-relaxed focus:outline-none focus:border-primary transition-colors resize-none"
-                            required
-                        />
+                        <div className="relative">
+                            <textarea
+                                placeholder="Describe what content you want to focus on..."
+                                value={instructions}
+                                onChange={(e) => setInstructions(e.target.value)}
+                                className="w-full min-h-[150px] p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 text-sm leading-relaxed focus:outline-none focus:border-primary transition-colors resize-y"
+                                required
+                            />
+                            <Button
+                                type="button"
+                                size="icon"
+                                className="absolute bottom-4 right-4 rounded-full h-8 w-8 bg-indigo-600 text-yellow-300 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center justify-center shadow-lg transition-all active:scale-95"
+                                onClick={handleRewritePrompt}
+                                aria-label="Help me rewrite this prompt"
+                                disabled={isRewritingPrompt}
+                            >
+                                {isRewritingPrompt ? (
+                                    <Loader2 className="animate-spin h-4 w-4 text-white" />
+                                ) : (
+                                    <Sparkle size={16} fill="currentColor" />
+                                )}
+                            </Button>
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Difficulty Level</label>
@@ -241,7 +313,7 @@ export default function CreateStudySetForm() {
                         />
                     </div>
 
-                    <Button type="submit" className="w-full h-20 rounded-3xl text-2xl font-black shadow-2xl transition-all active:scale-[0.98] bg-primary text-primary-foreground" disabled={isPending || selectedFiles.length === 0}>
+                    <Button type="submit" className="w-full h-20 rounded-3xl text-2xl font-black shadow-2xl transition-all active:scale-[0.98] bg-primary text-primary-foreground" disabled={isPending || isRewritingPrompt || selectedFiles.length === 0}>
                         {isPending ? <Loader2 className="animate-spin mr-3 h-8 w-8" /> : <Sparkles className="mr-3 h-8 w-8" />}
                         {isPending ? "Generating..." : "Create Study Set"}
                     </Button>
